@@ -1,0 +1,53 @@
+-- Haze Piece - Auto Farm LVL (Simple)
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local autoFarm = true
+
+print("✅ Auto Farm LVL activé - Haze Piece")
+
+local function getNearestMob()
+    local closest, dist = nil, math.huge
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    
+    for _, mob in pairs(Workspace:GetDescendants()) do
+        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+            if not Players:FindFirstChild(mob.Name) then  -- Pas un joueur
+                local d = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if d < dist and d < 300 then
+                    closest = mob
+                    dist = d
+                end
+            end
+        end
+    end
+    return closest
+end
+
+RunService.Heartbeat:Connect(function()
+    if not autoFarm then return end
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local tool = char and char:FindFirstChildOfClass("Tool")
+    
+    if hrp and tool then
+        local mob = getNearestMob()
+        if mob and mob:FindFirstChild("HumanoidRootPart") then
+            hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 5, 8)
+            tool:Activate()
+        end
+    end
+end)
+
+-- Toggle avec F
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then
+        autoFarm = not autoFarm
+        print("Auto Farm :", autoFarm and "ON" or "OFF")
+    end
+end)
+
+print("Appuie sur F pour activer/désactiver l'Auto Farm")
