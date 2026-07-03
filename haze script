@@ -1,4 +1,4 @@
--- Haze Piece - Auto Farm LVL (Simple)
+-- Haze Seas - Auto Farm LVL (évite les NPC de quête)
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
@@ -6,18 +6,23 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local autoFarm = true
 
-print("✅ Auto Farm LVL activé - Haze Piece")
+print("✅ Auto Farm activé (évite les NPC quête) - Appuie sur F pour ON/OFF")
+
+local function isQuestNPC(mob)
+    local name = mob.Name:lower()
+    return name:find("quest") or name:find("npc") or name:find("old man") or name:find("sailor") or name:find("captain")
+end
 
 local function getNearestMob()
     local closest, dist = nil, math.huge
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
-    
+
     for _, mob in pairs(Workspace:GetDescendants()) do
         if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-            if not Players:FindFirstChild(mob.Name) then  -- Pas un joueur
+            if not Players:FindFirstChild(mob.Name) and not isQuestNPC(mob) then
                 local d = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
-                if d < dist and d < 300 then
+                if d < dist and d < 250 then
                     closest = mob
                     dist = d
                 end
@@ -30,24 +35,22 @@ end
 RunService.Heartbeat:Connect(function()
     if not autoFarm then return end
     local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local tool = char and char:FindFirstChildOfClass("Tool")
-    
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local tool = char:FindFirstChildOfClass("Tool")
+
     if hrp and tool then
         local mob = getNearestMob()
-        if mob and mob:FindFirstChild("HumanoidRootPart") then
+        if mob then
             hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 5, 8)
             tool:Activate()
         end
     end
 end)
 
--- Toggle avec F
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F then
+game:GetService("UserInputService").InputBegan:Connect(function(i)
+    if i.KeyCode == Enum.KeyCode.F then
         autoFarm = not autoFarm
         print("Auto Farm :", autoFarm and "ON" or "OFF")
     end
 end)
-
-print("Appuie sur F pour activer/désactiver l'Auto Farm")
