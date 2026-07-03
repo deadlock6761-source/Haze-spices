@@ -1,4 +1,4 @@
--- Haze Seas - Gros Script Complet (Optimisé)
+-- Haze Seas - Script Parfait Complet (Tout inclus - Optimisé)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -24,14 +24,15 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 420, 0, 620)
-main.Position = UDim2.new(0.5, -210, 0.5, -310)
-main.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
+main.Size = UDim2.new(0, 420, 0, 680)
+main.Position = UDim2.new(0.5, -210, 0.5, -340)
+main.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 main.Parent = screenGui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
 
 -- Drag
 local dragging = false
+local dragStart, startPos
 main.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -55,12 +56,12 @@ title.Size = UDim2.new(1,0,0,60)
 title.BackgroundColor3 = Color3.fromRGB(255, 130, 40)
 title.Text = "🍋 Haze Seas Hub"
 title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBlack
+title.Font = Enum.Font.GothamBold
 title.TextSize = 24
 title.Parent = main
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 16)
 
--- Fonction bouton
+-- Boutons
 local function createButton(text, y, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9,0,0,55)
@@ -222,4 +223,22 @@ local function toggleNoclip()
         noclipConn = RunService.Stepped:Connect(function()
             local char = player.Character
             if char then
-                for _, part in pairs(char:GetDescendants
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
+        local char = player.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = true end
+            end
+        end
+    end
+end
+
+print("✅ Script Haze Seas Parfait chargé - Tout est inclus")
