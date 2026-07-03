@@ -1,41 +1,18 @@
--- Haze Seas - Auto Farm LVL (Corrigé)
-local player = game.Players.LocalPlayer
-local autoFarm = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/deadlock6761-source/Haze-spices/refs/heads/main/haze%20script"))()
 
-local badNames = {"Quest", "NPC", "Old", "Sailor", "Captain", "Merchant", "Villager"}
+-- Correction ajoutée (exécute ça après le script principal)
+local badNPC = {"Quest", "NPC", "Old Man", "Sailor", "Captain", "Merchant", "Villager", "Blacksmith"}
 
-print("Auto Farm LVL activé - F pour toggle")
-
-game:GetService("RunService").Heartbeat:Connect(function()
-    if not autoFarm then return end
-    local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local tool = char:FindFirstChildOfClass("Tool")
-    
-    if hrp and tool then
-        for _, mob in pairs(game.Workspace:GetDescendants()) do
-            if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                local isBad = false
-                for _, bad in pairs(badNames) do
-                    if mob.Name:find(bad) then isBad = true; break end
-                end
-                if not isBad and not game.Players:FindFirstChild(mob.Name) then
-                    local dist = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
-                    if dist < 200 then
-                        hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 5, 8)
-                        tool:Activate()
-                        break
+spawn(function()
+    while wait(1) do
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            if v:FindFirstChild("Humanoid") then
+                for _, name in pairs(badNPC) do
+                    if v.Name:find(name) then
+                        v.Humanoid.Health = 0 -- ou ignore
                     end
                 end
             end
         end
-    end
-end)
-
-game:GetService("UserInputService").InputBegan:Connect(function(i)
-    if i.KeyCode == Enum.KeyCode.F then
-        autoFarm = not autoFarm
-        print("Auto Farm :", autoFarm and "ON" or "OFF")
     end
 end)
