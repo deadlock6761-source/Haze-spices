@@ -1,4 +1,4 @@
--- Haze Seas - Hub Complet Optimisé (Anti-Lag + Meilleur Auto Farm)
+-- Haze Seas - Gros Script Complet (Optimisé)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -11,24 +11,24 @@ local flying = false
 local noclipping = false
 local killAura = false
 
-local flySpeed = 60
-local walkSpeed = 50
+local flySpeed = 70
+local walkSpeed = 60
 local killAuraRange = 25
 
 local selectedWeapon = nil
 
--- ==================== GUI DRAGGABLE ====================
+-- ==================== GUI ====================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "HazeHub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 400, 0, 580)
-main.Position = UDim2.new(0.5, -200, 0.5, -290)
-main.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+main.Size = UDim2.new(0, 420, 0, 620)
+main.Position = UDim2.new(0.5, -210, 0.5, -310)
+main.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
 main.Parent = screenGui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
 
 -- Drag
 local dragging = false
@@ -51,71 +51,79 @@ end)
 
 -- Titre
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,55)
-title.BackgroundColor3 = Color3.fromRGB(255, 120, 50)
+title.Size = UDim2.new(1,0,0,60)
+title.BackgroundColor3 = Color3.fromRGB(255, 130, 40)
 title.Text = "🍋 Haze Seas Hub"
 title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 24
 title.Parent = main
-Instance.new("UICorner", title).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", title).CornerRadius = UDim.new(0, 16)
 
--- Boutons
-local function createButton(text, pos, callback)
+-- Fonction bouton
+local function createButton(text, y, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9,0,0,50)
-    btn.Position = pos
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,55)
+    btn.Size = UDim2.new(0.9,0,0,55)
+    btn.Position = UDim2.new(0.05,0,y,0)
+    btn.BackgroundColor3 = Color3.fromRGB(35,35,50)
     btn.Text = text
     btn.TextColor3 = Color3.new(1,1,1)
     btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 16
     btn.Parent = main
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
     btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
-local farmBtn = createButton("Auto Farm LVL : OFF", UDim2.new(0.05,0,0,70), function()
+local farmBtn = createButton("Auto Farm LVL : OFF", 80, function()
     autoFarm = not autoFarm
     farmBtn.Text = "Auto Farm LVL : " .. (autoFarm and "ON" or "OFF")
 end)
 
-local flyBtn = createButton("Fly : OFF", UDim2.new(0.05,0,0,130), function()
+local flyBtn = createButton("Fly : OFF", 150, function()
     flying = not flying
     flyBtn.Text = "Fly : " .. (flying and "ON" or "OFF")
-    -- Toggle Fly logic here (same as before)
 end)
 
-local noclipBtn = createButton("Noclip : OFF", UDim2.new(0.05,0,0,190), function()
+local speedBtn = createButton("Speed Hack : OFF", 220, function()
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+    if hum then
+        hum.WalkSpeed = (hum.WalkSpeed == 16 and walkSpeed or 16)
+        speedBtn.Text = "Speed Hack : " .. (hum.WalkSpeed > 16 and "ON" or "OFF")
+    end
+end)
+
+local noclipBtn = createButton("Noclip : OFF", 290, function()
     noclipping = not noclipping
     noclipBtn.Text = "Noclip : " .. (noclipping and "ON" or "OFF")
 end)
 
-local killAuraBtn = createButton("Kill Aura : OFF", UDim2.new(0.05,0,0,250), function()
+local killAuraBtn = createButton("Kill Aura : OFF", 360, function()
     killAura = not killAura
     killAuraBtn.Text = "Kill Aura : " .. (killAura and "ON" or "OFF")
 end)
 
 -- Weapon Select
 local weaponBox = Instance.new("TextBox")
-weaponBox.Size = UDim2.new(0.9,0,0,40)
-weaponBox.Position = UDim2.new(0.05,0,0,320)
+weaponBox.Size = UDim2.new(0.9,0,0,45)
+weaponBox.Position = UDim2.new(0.05,0,0,440)
 weaponBox.PlaceholderText = "Nom de l'arme"
 weaponBox.BackgroundColor3 = Color3.fromRGB(30,30,45)
 weaponBox.Parent = main
-Instance.new("UICorner", weaponBox).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", weaponBox).CornerRadius = UDim.new(0, 10)
 
 weaponBox.FocusLost:Connect(function()
     selectedWeapon = weaponBox.Text ~= "" and weaponBox.Text or nil
 end)
 
--- ==================== FONCTIONS OPTIMISÉES ====================
+-- ==================== FONCTIONS ====================
 local function getNearestMob()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
-    local closest, dist = nil, 250
+    local closest, dist = nil, 280
 
-    for _, obj in pairs(Workspace:GetChildren()) do -- Seulement GetChildren() pour moins de lag
+    for _, obj in pairs(Workspace:GetChildren()) do
         if obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") and obj.Humanoid.Health > 0 then
             if not Players:FindFirstChild(obj.Name) then
                 local d = (obj.HumanoidRootPart.Position - hrp.Position).Magnitude
@@ -129,7 +137,7 @@ local function getNearestMob()
     return closest
 end
 
--- Auto Farm (optimisé)
+-- Auto Farm
 RunService.Heartbeat:Connect(function()
     if not autoFarm then return end
     local char = player.Character
@@ -146,7 +154,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Kill Aura (optimisé)
+-- Kill Aura
 RunService.Heartbeat:Connect(function()
     if not killAura then return end
     local char = player.Character
@@ -166,4 +174,52 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("✅ Hub Haze Seas chargé - Tout est optimisé")
+-- Fly
+local bv, bg
+local function toggleFly()
+    flying = not flying
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return end
+
+    if flying then
+        hum.PlatformStand = true
+        bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        bv.Parent = hrp
+        bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+        bg.P = 12500
+        bg.Parent = hrp
+    else
+        hum.PlatformStand = false
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    if flying and bv and bg then
+        local cam = Workspace.CurrentCamera
+        local move = Vector3.new()
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0,1,0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move -= Vector3.new(0,1,0) end
+        bv.Velocity = move.Unit * flySpeed
+        bg.CFrame = cam.CFrame
+    end
+end)
+
+-- Noclip
+local noclipConn
+local function toggleNoclip()
+    noclipping = not noclipping
+    if noclipping then
+        noclipConn = RunService.Stepped:Connect(function()
+            local char = player.Character
+            if char then
+                for _, part in pairs(char:GetDescendants
