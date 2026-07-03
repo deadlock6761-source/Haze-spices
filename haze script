@@ -1,49 +1,34 @@
--- Haze Seas - Auto Farm LVL (évite les NPC de quête)
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
+-- Haze Seas - Auto Farm LVL (Corrigé)
+local player = game.Players.LocalPlayer
 local autoFarm = true
 
-print("✅ Auto Farm activé (évite les NPC quête) - Appuie sur F pour ON/OFF")
+local badNames = {"Quest", "NPC", "Old", "Sailor", "Captain", "Merchant", "Villager"}
 
-local function isQuestNPC(mob)
-    local name = mob.Name:lower()
-    return name:find("quest") or name:find("npc") or name:find("old man") or name:find("sailor") or name:find("captain")
-end
+print("Auto Farm LVL activé - F pour toggle")
 
-local function getNearestMob()
-    local closest, dist = nil, math.huge
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    for _, mob in pairs(Workspace:GetDescendants()) do
-        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-            if not Players:FindFirstChild(mob.Name) and not isQuestNPC(mob) then
-                local d = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
-                if d < dist and d < 250 then
-                    closest = mob
-                    dist = d
-                end
-            end
-        end
-    end
-    return closest
-end
-
-RunService.Heartbeat:Connect(function()
+game:GetService("RunService").Heartbeat:Connect(function()
     if not autoFarm then return end
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local tool = char:FindFirstChildOfClass("Tool")
-
+    
     if hrp and tool then
-        local mob = getNearestMob()
-        if mob then
-            hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 5, 8)
-            tool:Activate()
+        for _, mob in pairs(game.Workspace:GetDescendants()) do
+            if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                local isBad = false
+                for _, bad in pairs(badNames) do
+                    if mob.Name:find(bad) then isBad = true; break end
+                end
+                if not isBad and not game.Players:FindFirstChild(mob.Name) then
+                    local dist = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
+                    if dist < 200 then
+                        hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 5, 8)
+                        tool:Activate()
+                        break
+                    end
+                end
+            end
         end
     end
 end)
